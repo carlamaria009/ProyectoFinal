@@ -7,7 +7,7 @@ import os
 import joblib  # Para guardar los datos
 
 #función que realiza la división. Recibe los valores de la matriz (X) y las categorías(Y) emociones
-def prepare_datasets(X, Y, save_path="/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/"):
+def prepare_datasets(X, Y, save_path="src/"):
 
     # Extraer nombres de columnas si existen
     if isinstance(X, pd.DataFrame):
@@ -48,7 +48,7 @@ def prepare_datasets(X, Y, save_path="/content/drive/MyDrive/Colab Notebooks/Pro
 
     return x_train_scaled, x_test_scaled, y_train, y_test, feature_names
 
-def prepare_datasets2(X, Y, save_path="/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/"):
+def prepare_datasets2(X, Y, save_path="src/"):
 
     # Extraer nombres de columnas si existen
     if isinstance(X, pd.DataFrame):
@@ -113,7 +113,7 @@ def check_train(pkl_filename):
     import matplotlib.pyplot as plt
 
     # Ruta a tu archivo train.pkl y class_labels.npy
-    train_path = "/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/"
+    train_path = "src/"
     pkl_path = os.path.join(train_path, pkl_filename)
     class_names_path = os.path.join(train_path, "class_labels.npy")
 

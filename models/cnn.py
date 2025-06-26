@@ -28,8 +28,8 @@ from keras.regularizers import l2
 
 import joblib
 
-def ejecutar_modelo_cnn(data_path="/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/",
-                   models_path="/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/models/"):
+def ejecutar_modelo_cnn(data_path="src/",
+                   models_path="models/"):
   # 📦 Cargar datos de entrenamiento y prueba
   x_train, y_train, feature_names = joblib.load(os.path.join(data_path, "train.pkl"))
   x_test, y_test, feature_names = joblib.load(os.path.join(data_path, "test.pkl"))

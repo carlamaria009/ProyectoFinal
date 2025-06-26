@@ -30,7 +30,7 @@ def balancear_smotepkl():
     from imblearn.over_sampling import SMOTE
     from sklearn.preprocessing import OneHotEncoder
 
-    data_path = "/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/"
+    data_path = "src/"
     
     # Cargar datos originales
     X_train, Y_train, feature_names = joblib.load(os.path.join(data_path, "train.pkl"))

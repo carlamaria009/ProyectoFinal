@@ -1,11 +1,11 @@
-def generate_shap_outputs(model, x_data, feature_names, output_dir="/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/results"):
+def generate_shap_outputs(model, x_data, feature_names, output_dir="results"):
     import shap
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
     import os
 
-    class_names = np.load("/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/class_labels.npy", allow_pickle=True)
+    class_names = np.load("src/class_labels.npy", allow_pickle=True)
     
     os.makedirs(output_dir, exist_ok=True)
     print("🔍 Generando explicaciones SHAP ...")

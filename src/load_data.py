@@ -174,7 +174,7 @@ def load_savee_dataset(savee_path):
 
 #función que explora los dato. Crea un gráfico de barras con las emociones identificadas
 def explore_data(df):
-    df.to_csv("/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/data_path.csv", index=False)
+    df.to_csv("src/data_path.csv", index=False)
     #print("DF en explore_data")
     #print(df.head())
 
@@ -262,7 +262,7 @@ def process_dataset(df):
     features_df['Emotions'] = Y
 
     # Guardar a CSV
-    features_df.to_csv('/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/features.csv', index=False)
+    features_df.to_csv('src/features.csv', index=False)
 
     return features_df
 
@@ -324,6 +324,6 @@ def run_pipeline(ravdess_path=None, crema_path=None, tess_path=None, savee_path=
     #print(features.head())
     
     X = features.iloc[:, :-1]
-    Y, _ = encode_labels(features['Emotions'], '/content/drive/MyDrive/Colab Notebooks/ProyectoFinal/src/')
+    Y, _ = encode_labels(features['Emotions'], 'src/')
     
     return X, Y

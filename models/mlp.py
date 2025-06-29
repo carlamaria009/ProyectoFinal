@@ -32,6 +32,9 @@ def run_mlp(
     n_classes = y_train.shape[1]
     input_dim = x_train.shape[1]
 
+    # 🎯 Convertir etiquetas one-hot a enteros para selección de características
+    y_train_labels = np.argmax(y_train, axis=1)
+
     # ⭐ Aplicar selección de características
     from sklearn.feature_selection import SelectKBest, f_classif
     selector = SelectKBest(f_classif, k=200)

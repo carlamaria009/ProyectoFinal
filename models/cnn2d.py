@@ -33,24 +33,24 @@ def run_cnn2d(data_path="src/", models_path="models/"):
         layers.Input(shape=(128, 128, 1)),
 
         layers.Conv2D(32, (3, 3), activation='relu',
-                      kernel_regularizer=regularizers.l2(0.001)),
+                      kernel_regularizer=regularizers.l2(0.01)),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
 
         layers.Conv2D(64, (3, 3), activation='relu',
-                      kernel_regularizer=regularizers.l2(0.001)),
+                      kernel_regularizer=regularizers.l2(0.01)),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
 
         layers.Conv2D(128, (3, 3), activation='relu',
-                      kernel_regularizer=regularizers.l2(0.001)),
+                      kernel_regularizer=regularizers.l2(0.01)),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
 
         layers.Flatten(),
-        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
+        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
         layers.BatchNormalization(),
-        layers.Dropout(0.4),
+        layers.Dropout(0.5),
 
         layers.Dense(n_classes, activation='softmax')
     ])
@@ -61,7 +61,7 @@ def run_cnn2d(data_path="src/", models_path="models/"):
         metrics=['accuracy']
     )
 
-    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
     print("🚀 Entrenando modelo CNN 2D con L2 y BatchNormalization...")
     history = model.fit(

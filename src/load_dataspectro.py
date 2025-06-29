@@ -251,17 +251,35 @@ def pad_or_truncate(spectrogram, target_length):
 def process_dataset(df):
     X = []
     Y = []
+    errores = 0
+
+    target_length = 128  # número fijo de frames
+
     for path, emotion in zip(df.Path, df.Emotions):
-        mel_db = get_features(path)
-        X.append(mel_db)
-        Y.append(emotion)
+        try:
+            mel_db = get_features(path)
 
-    target_length = 128  # por ejemplo, define un tamaño fijo de tiempo
-    X = [pad_or_truncate(x, target_length) for x in X]
-    X = np.array(X)  # Aquí X será (num_samples, n_mels, time_frames)
+            # Asegurarse de que tenga la forma esperada (128, ?)
+            if mel_db.shape[0] != 128:
+                print(f"❌ Espectrograma con forma inesperada: {mel_db.shape} para archivo {path}")
+                errores += 1
+                continue
+
+            mel_db_fixed = pad_or_truncate(mel_db, target_length)  # (128, 128)
+            X.append(mel_db_fixed)
+            Y.append(emotion)
+
+        except Exception as e:
+            print(f"⚠️ Error procesando {path}: {e}")
+            errores += 1
+            continue
+
+    print(f"✅ Procesamiento completado con {len(X)} muestras. {errores} errores ignorados.")
+
+    X = np.array(X)  # Ahora sí: (num_samples, 128, 128)
     Y_encoded, encoder = encode_labels(Y, 'src/')
-
     return X, Y_encoded
+
 
 # convierte etiquetas categóricas (como emociones) a formato one-hot, que es el formato que suelen requerir 
 # los modelos de machine learning y almacena las categorías en el archivo class_labels.npy

@@ -49,15 +49,14 @@ def prepare_datasets(X, Y, save_path="src/"):
     return x_train_scaled, x_test_scaled, y_train, y_test, feature_names
 
 def prepare_datasets2(X, Y, save_path="src/"):
+    import os
+    import numpy as np
+    import pandas as pd
+    import joblib
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
 
-    # Extraer nombres de columnas si existen
-    if isinstance(X, pd.DataFrame):
-        feature_names = X.columns.tolist()
-        X = X.values  # convertimos a ndarray para el procesamiento
-    else:
-        feature_names = [f"feature_{i}" for i in range(X.shape[1])]
-
-    # Obtener etiquetas crudas para estratificar
+    # Obtener etiquetas crudas para estratificar (Y está en one-hot)
     Y_labels = np.argmax(Y, axis=1)
 
     # División en train (70%) y test+val (30%)
@@ -75,22 +74,27 @@ def prepare_datasets2(X, Y, save_path="src/"):
     print(f"Tamaño del conjunto de validación: {x_val.shape[0]} muestras")
     print(f"Tamaño del conjunto de prueba: {x_test.shape[0]} muestras")
 
-    # Escalado (StandardScaler espera 2D, así que X debe tener forma (n, features))
-    scaler = StandardScaler()
+    # Aplanar para escalar (StandardScaler espera 2D)
     x_train_flat = x_train.reshape(x_train.shape[0], -1)
     x_val_flat = x_val.reshape(x_val.shape[0], -1)
     x_test_flat = x_test.reshape(x_test.shape[0], -1)
 
+    # Escalar
+    scaler = StandardScaler()
     x_train_scaled = scaler.fit_transform(x_train_flat)
     x_val_scaled = scaler.transform(x_val_flat)
     x_test_scaled = scaler.transform(x_test_flat)
 
-    # Expandir dimensión para CNN u otros modelos
+    # Expandir dimensión para modelos tipo CNN (ej. [batch, features, 1])
     x_train_scaled = np.expand_dims(x_train_scaled, axis=2)
     x_val_scaled = np.expand_dims(x_val_scaled, axis=2)
     x_test_scaled = np.expand_dims(x_test_scaled, axis=2)
 
-    # Guardar datasets y scaler
+    # Generar nombres genéricos para las columnas
+    num_features = x_train.shape[1] * x_train.shape[2]  # n_mels × time_frames
+    feature_names = [f"mel_{i}" for i in range(num_features)]
+
+    # Crear carpeta y guardar
     os.makedirs(save_path, exist_ok=True)
     joblib.dump((x_train_scaled, y_train, feature_names), os.path.join(save_path, "train.pkl"))
     joblib.dump((x_val_scaled, y_val, feature_names), os.path.join(save_path, "val.pkl"))
@@ -99,7 +103,7 @@ def prepare_datasets2(X, Y, save_path="src/"):
 
     print(f"✅ Datos guardados en {save_path}")
 
-    # Mostrar primeras filas del set escalado (plano)
+    # Vista previa de los primeros 5 ejemplos (aplanados)
     df_preview = pd.DataFrame(x_train_scaled.reshape(x_train_scaled.shape[0], -1)[:5], columns=feature_names)
     print("\n📋 Primeras 5 filas del set de entrenamiento:")
     print(df_preview)

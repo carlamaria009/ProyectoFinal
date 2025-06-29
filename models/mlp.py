@@ -1,3 +1,4 @@
+pip install tensorflow-addons
 import os
 import numpy as np
 import joblib
@@ -79,7 +80,7 @@ def run_mlp(
     )
 
     # 💾 Guardar modelo
-    model_path = os.path.join(models_path, "mlp_best.pkl")
+    model_path = os.path.join(models_path, "mlp.h5")
     model.save(model_path)
     print(f"📦 Modelo MLP guardado en: {model_path}")
 

@@ -238,7 +238,15 @@ def get_features(path):
     data, sample_rate = librosa.load(path, duration=2.5, offset=0.6)
     mel_db = extract_mel_spectrogram(data, sample_rate)
     return mel_db
-    
+
+def pad_or_truncate(spectrogram, target_length):
+    current_length = spectrogram.shape[1]
+    if current_length < target_length:
+        pad_width = target_length - current_length
+        return np.pad(spectrogram, ((0, 0), (0, pad_width)), mode='constant')
+    else:
+        return spectrogram[:, :target_length]
+        
 #Función que hace la llamada a las funciones que obtienen los features y los nombres de los features.
 def process_dataset(df):
     X = []
@@ -248,6 +256,8 @@ def process_dataset(df):
         X.append(mel_db)
         Y.append(emotion)
 
+    target_length = 128  # por ejemplo, define un tamaño fijo de tiempo
+    X = [pad_or_truncate(x, target_length) for x in X]
     X = np.array(X)  # Aquí X será (num_samples, n_mels, time_frames)
     Y_encoded, encoder = encode_labels(Y, 'src/')
 

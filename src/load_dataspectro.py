@@ -333,12 +333,6 @@ def run_pipeline(ravdess_path=None, crema_path=None, tess_path=None, savee_path=
     print("Exploración de datos")
     explore_data(full_df)
 
-    features = process_dataset(full_df)
-    
-    #print("Exploración de features")
-    #print(features.head())
-    
-    X = features.iloc[:, :-1]
-    Y, _ = encode_labels(features['Emotions'], 'src/')
-    
+    X, Y = process_dataset(full_df)
     return X, Y
+

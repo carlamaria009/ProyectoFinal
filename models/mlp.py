@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, callbacks
 from sklearn.metrics import classification_report
 from models.metrics import metrics_values
+from tensorflow_addons.losses import SigmoidFocalCrossEntropy
 
 def run_mlp(
     data_path="src/",
@@ -58,7 +59,7 @@ def run_mlp(
 
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
-        loss=CategoricalFocalLoss(gamma=2.0),#'categorical_crossentropy',
+        loss=SigmoidFocalCrossEntropy(gamma=2.0),#'categorical_crossentropy',
         metrics=['accuracy']
     )
 

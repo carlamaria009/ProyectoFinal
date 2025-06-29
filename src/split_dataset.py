@@ -28,7 +28,7 @@ def prepare_datasets(X, Y, save_path="src/"):
     scaler = StandardScaler()
     x_train_scaled = scaler.fit_transform(x_train)
     x_test_scaled = scaler.transform(x_test)
-
+    
     # Expandir dimensión para modelos que lo requieren
     x_train_scaled = np.expand_dims(x_train_scaled, axis=2)
     x_test_scaled = np.expand_dims(x_test_scaled, axis=2)
@@ -85,10 +85,15 @@ def prepare_datasets2(X, Y, save_path="src/"):
     x_val_scaled = scaler.transform(x_val_flat)
     x_test_scaled = scaler.transform(x_test_flat)
 
+    # Volver a forma 2D + canal para CNN2D
+    x_train_scaled = x_train_scaled_flat.reshape(-1, x_train.shape[1], x_train.shape[2], 1)
+    x_val_scaled = x_val_scaled_flat.reshape(-1, x_val.shape[1], x_val.shape[2], 1)
+    x_test_scaled = x_test_scaled_flat.reshape(-1, x_test.shape[1], x_test.shape[2], 1)
+
     # Expandir dimensión para modelos tipo CNN (ej. [batch, features, 1])
-    x_train_scaled = np.expand_dims(x_train_scaled, axis=2)
-    x_val_scaled = np.expand_dims(x_val_scaled, axis=2)
-    x_test_scaled = np.expand_dims(x_test_scaled, axis=2)
+    #x_train_scaled = np.expand_dims(x_train_scaled, axis=2)
+    #x_val_scaled = np.expand_dims(x_val_scaled, axis=2)
+    #x_test_scaled = np.expand_dims(x_test_scaled, axis=2)
 
     # Generar nombres genéricos para las columnas
     num_features = x_train.shape[1] * x_train.shape[2]  # n_mels × time_frames

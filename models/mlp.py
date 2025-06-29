@@ -1,4 +1,4 @@
-pip install tensorflow-addons
+!pip install tensorflow-addons
 import os
 import numpy as np
 import joblib

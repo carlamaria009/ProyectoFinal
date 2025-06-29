@@ -260,9 +260,39 @@ def get_feature_names():
 #Carga 2.5 segundos de audio a partir del segundo 0.6 desde un archivo. Esto con el objetivo de estandarizar
 #Extrae características del audio usando la función extract_features definida anteriormente
 #Devuelve el vector de características.·
-def get_features(path):
-    data, sample_rate = librosa.load(path, duration=2.5, offset=0.6)
-    return extract_features(data, sample_rate)
+import librosa
+import numpy as np
+
+def get_features(path, n_mels=128, n_fft=2048, hop_length=512, duration=2.5, offset=0.6):
+    try:
+        # 1. Cargar el audio
+        y, sr = librosa.load(path, duration=duration, offset=offset)
+        
+        # 2. Obtener el espectrograma tipo imagen
+        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, n_fft=n_fft, hop_length=hop_length)
+
+        # 3. Escala logarítmica (dB)
+        mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
+
+        # 4. Normalización a rango 0-1
+        mel_spec_db = (mel_spec_db - mel_spec_db.min()) / (mel_spec_db.max() - mel_spec_db.min())
+
+        # 5. Asegurarnos de tener tamaño fijo (128 x 128)
+        if mel_spec_db.shape[1] < 128:
+            pad_width = 128 - mel_spec_db.shape[1]
+            mel_spec_db = np.pad(mel_spec_db, pad_width=((0,0), (0, pad_width)), mode='constant')
+        else:
+            mel_spec_db = mel_spec_db[:, :128]  # recortar si es más grande
+
+        # 6. Expandir dimensiones para CNN 2D: (128, 128, 1)
+        mel_spec_db = np.expand_dims(mel_spec_db, axis=-1)
+
+        return mel_spec_db
+    
+    except Exception as e:
+        print(f"❌ Error en {path}: {e}")
+        return np.zeros((128, 128, 1))  # fallback por si hay error
+
 
 #Función que hace la llamada a las funciones que obtienen los features y los nombres de los features.
 def process_dataset(df):

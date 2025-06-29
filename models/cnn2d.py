@@ -54,7 +54,7 @@ def run_cnn2d(data_path="src/", models_path="models/"):
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
-        epochs=50,
+        epochs=25,
         batch_size=32,
         callbacks=[early_stop],
         verbose=2

@@ -57,33 +57,41 @@ def prepare_datasets2(X, Y, save_path="src/"):
     else:
         feature_names = [f"feature_{i}" for i in range(X.shape[1])]
 
+    # Obtener etiquetas crudas para estratificar
+    Y_labels = np.argmax(Y, axis=1)
+
     # División en train (70%) y test+val (30%)
     x_train, x_temp, y_train, y_temp = train_test_split(
-        X, Y, test_size=0.3, random_state=0, stratify=Y
+        X, Y, test_size=0.3, random_state=0, stratify=Y_labels
     )
 
     # División del conjunto temporal en validation (15%) y test (15%)
-    # Como x_temp es 30%, dividirlo en mitades para val y test (cada 15%)
+    y_temp_labels = np.argmax(y_temp, axis=1)
     x_val, x_test, y_val, y_test = train_test_split(
-        x_temp, y_temp, test_size=0.5, random_state=0, stratify=y_temp
+        x_temp, y_temp, test_size=0.5, random_state=0, stratify=y_temp_labels
     )
 
     print(f"Tamaño del conjunto de entrenamiento: {x_train.shape[0]} muestras")
     print(f"Tamaño del conjunto de validación: {x_val.shape[0]} muestras")
     print(f"Tamaño del conjunto de prueba: {x_test.shape[0]} muestras")
 
-    # Escalado usando solo el train
+    # Escalado (StandardScaler espera 2D, así que X debe tener forma (n, features))
     scaler = StandardScaler()
-    x_train_scaled = scaler.fit_transform(x_train)
-    x_val_scaled = scaler.transform(x_val)
-    x_test_scaled = scaler.transform(x_test)
+    x_train_flat = x_train.reshape(x_train.shape[0], -1)
+    x_val_flat = x_val.reshape(x_val.shape[0], -1)
+    x_test_flat = x_test.reshape(x_test.shape[0], -1)
 
-    # Expandir dimensión para modelos que lo requieren
+    x_train_scaled = scaler.fit_transform(x_train_flat)
+    x_val_scaled = scaler.transform(x_val_flat)
+    x_test_scaled = scaler.transform(x_test_flat)
+
+    # Expandir dimensión para CNN u otros modelos
     x_train_scaled = np.expand_dims(x_train_scaled, axis=2)
     x_val_scaled = np.expand_dims(x_val_scaled, axis=2)
     x_test_scaled = np.expand_dims(x_test_scaled, axis=2)
 
     # Guardar datasets y scaler
+    os.makedirs(save_path, exist_ok=True)
     joblib.dump((x_train_scaled, y_train, feature_names), os.path.join(save_path, "train.pkl"))
     joblib.dump((x_val_scaled, y_val, feature_names), os.path.join(save_path, "val.pkl"))
     joblib.dump((x_test_scaled, y_test, feature_names), os.path.join(save_path, "test.pkl"))
@@ -91,9 +99,8 @@ def prepare_datasets2(X, Y, save_path="src/"):
 
     print(f"✅ Datos guardados en {save_path}")
 
-    # Mostrar primeras filas para ver que todo va bien
-    x_train_flat = x_train_scaled.reshape(x_train_scaled.shape[0], -1)
-    df_preview = pd.DataFrame(x_train_flat[:5], columns=feature_names)
+    # Mostrar primeras filas del set escalado (plano)
+    df_preview = pd.DataFrame(x_train_scaled.reshape(x_train_scaled.shape[0], -1)[:5], columns=feature_names)
     print("\n📋 Primeras 5 filas del set de entrenamiento:")
     print(df_preview)
 

@@ -6,6 +6,7 @@ from tensorflow.keras import layers, models, callbacks
 from sklearn.metrics import classification_report
 from models.metrics import metrics_values
 from tensorflow_addons.losses import SigmoidFocalCrossEntropy
+from keras.models import save_model
 
 def run_mlp(
     data_path="src/",

@@ -1,15 +1,11 @@
 from models.metrics import metrics_values
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV
+from xgboost import XGBClassifier
+from sklearn.model_selection import RandomizedSearchCV
 import os
 import numpy as np
 import joblib
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-def run_random_forest(
+def run_xgboost(
     data_path="src/",
     models_path="models/"
 ):
@@ -41,39 +37,38 @@ def run_random_forest(
     x_combined = np.concatenate((x_train, x_val), axis=0)
     y_combined = np.concatenate((y_train_labels, y_val_labels), axis=0)
 
-    # 🛠️ Definir parámetros a buscar
+    # 🛠️ Definir grid de hiperparámetros
     param_grid = {
         'n_estimators': [100, 200],
-        'max_depth': [10, 20, None],
-        'min_samples_split': [2, 5],
-        'min_samples_leaf': [1, 2],
-        'class_weight': ['balanced']
+        'max_depth': [6, 10],
+        'learning_rate': [0.1, 0.01]
     }
 
-    print("🔍 Buscando mejores hiperparámetros con GridSearchCV...")
-    grid = GridSearchCV(
-        estimator=RandomForestClassifier(random_state=42),
-        param_grid=param_grid,
-        cv=3,
-        scoring='accuracy',
-        n_jobs=-1,
-        verbose=1
+    print("🔍 Buscando mejores hiperparámetros con RandomizedSearchCV...")
+    grid = RandomizedSearchCV(
+    estimator=XGBClassifier(use_label_encoder=False, eval_metric='mlogloss'),
+    param_distributions=param_grid,
+    n_iter=4,  # solo 4 combinaciones al azar
+    scoring='accuracy',
+    cv=3,
+    n_jobs=-1,
+    verbose=1,
+    random_state=42
     )
 
     grid.fit(x_combined, y_combined)
     print(f"✅ Mejores parámetros encontrados: {grid.best_params_}")
 
-    best_rf = grid.best_estimator_
+    best_model = grid.best_estimator_
 
     # 💾 Guardar modelo
-    model_path = os.path.join(models_path, "random_forest_best.pkl")
-    joblib.dump(best_rf, model_path)
-    print(f"📦 Modelo optimizado guardado en: {model_path}")
+    model_path = os.path.join(models_path, "xgboost_best.pkl")
+    joblib.dump(best_model, model_path)
+    print(f"📦 Modelo XGBoost guardado en: {model_path}")
 
     # 📈 Evaluación en test
-    y_test_pred = best_rf.predict(x_test)
+    y_test_pred = best_model.predict(x_test)
     print("📈 Evaluación final en conjunto de prueba:")
     metrics_values(y_test_labels, y_test_pred, class_names)
 
-    return best_rf, x_test, feature_names
-
+    return best_model, x_test, feature_names

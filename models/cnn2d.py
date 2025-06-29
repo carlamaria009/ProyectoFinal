@@ -3,7 +3,7 @@ def run_cnn2d(data_path="src/", models_path="models/"):
     import numpy as np
     import joblib
     import tensorflow as tf
-    from tensorflow.keras import layers, models, callbacks
+    from tensorflow.keras import layers, models, callbacks, regularizers
     from sklearn.metrics import classification_report
     from models.metrics import metrics_values
 
@@ -12,10 +12,11 @@ def run_cnn2d(data_path="src/", models_path="models/"):
     x_val, y_val, _ = joblib.load(os.path.join(data_path, "val.pkl"))
     x_test, y_test, _ = joblib.load(os.path.join(data_path, "test.pkl"))
 
-    # ➕ Expandir canal para CNN 2D
-    x_train = np.expand_dims(x_train, -1)
-    x_val = np.expand_dims(x_val, -1)
-    x_test = np.expand_dims(x_test, -1)
+    # Asegurarse de que tenga canal de entrada (para seguridad)
+    if x_train.ndim == 3:
+        x_train = np.expand_dims(x_train, -1)
+        x_val = np.expand_dims(x_val, -1)
+        x_test = np.expand_dims(x_test, -1)
 
     # 🏷️ Cargar nombres de clases
     class_labels_path = os.path.join(data_path, "class_labels.npy")
@@ -27,18 +28,30 @@ def run_cnn2d(data_path="src/", models_path="models/"):
 
     n_classes = y_train.shape[1]
 
-    # 🧠 Modelo CNN 2D
+    # 🧠 Modelo CNN 2D con L2 y BatchNormalization
     model = models.Sequential([
         layers.Input(shape=(128, 128, 1)),
-        layers.Conv2D(32, (3, 3), activation='relu'),
+
+        layers.Conv2D(32, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+        layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+
+        layers.Conv2D(64, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+        layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(128, (3, 3), activation='relu'),
+
+        layers.Conv2D(128, (3, 3), activation='relu',
+                      kernel_regularizer=regularizers.l2(0.001)),
+        layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
+
         layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dropout(0.3),
+        layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.001)),
+        layers.BatchNormalization(),
+        layers.Dropout(0.4),
+
         layers.Dense(n_classes, activation='softmax')
     ])
 
@@ -48,9 +61,9 @@ def run_cnn2d(data_path="src/", models_path="models/"):
         metrics=['accuracy']
     )
 
-    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+    early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
-    print("🚀 Entrenando modelo CNN 2D...")
+    print("🚀 Entrenando modelo CNN 2D con L2 y BatchNormalization...")
     history = model.fit(
         x_train, y_train,
         validation_data=(x_val, y_val),
@@ -74,4 +87,3 @@ def run_cnn2d(data_path="src/", models_path="models/"):
     metrics_values(y_test_labels, y_pred_labels, class_names)
 
     return model, x_test, feature_names
-
